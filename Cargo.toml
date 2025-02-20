@@ -1,0 +1,43 @@
+[package]
+name = "d_size_measure"
+version = "0.1.0"
+authors = ["Juan De Luca <juan.f.d.luca@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tari_template_abi = { git = "https://github.com/tari-project/tari-dan.git", branch = "development", package = "tari_template_abi" }
+tari_template_lib = { git = "https://github.com/tari-project/tari-dan.git", branch = "development", package = "tari_template_lib" }
+serde = { version = "1.0.143", default-features = false, features = ["derive", "alloc"] }
+getrandom = { version = "0.2", features = ["js","wasm-bindgen"] }
+rand = { version = "0.8", default-features = false }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js", "wasm-bindgen"] }
+rand = { version = "0.8", features = ["getrandom"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+rand = { version = "0.8", features = ["std"] }
+
+
+
+
+[profile.release]
+opt-level = 's'     # Optimize for size.
+lto = true          # Enable Link Time Optimization.
+codegen-units = 1   # Reduce number of codegen units to increase optimizations.
+panic = 'abort'     # Abort on panic.
+strip = "debuginfo" # Strip debug info.
+
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dev-dependencies]
+log = "*"
+tari_template_test_tooling = {git = "https://github.com/tari-project/tari-dan.git", branch="development", package="tari_template_test_tooling" }
+tari_engine_types = { git = "https://github.com/tari-project/tari-dan.git", branch="development", package="tari_engine_types"}
+tari_transaction = { git = "https://github.com/tari-project/tari-dan.git", branch = "development" }
+tari_dan_common_types = {git = "https://github.com/tari-project/tari-dan.git", branch="development", package="tari_dan_common_types" }
+tari_common_types = {git = "https://github.com/tari-project/tari.git", branch="development", package="tari_common_types" }
