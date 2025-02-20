@@ -23,9 +23,7 @@ use tari_template_lib::prelude::*;
 use tari_template_lib::rand::{random_bytes, random_u32};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct DSizeMeasure {
-    pub brightness: u32,
-}
+pub struct DSizeMeasure {}
 
 struct WeightedRandomArgs {
     amount: Amount,
@@ -104,7 +102,7 @@ mod d_size_measure {
             res_manager.mint_non_fungible(
                 NonFungibleId::from_u32(self.counter - 1),
                 &immutable_data,
-                &DSizeMeasure { brightness: 0 },
+                &DSizeMeasure {},
             )
         }
 
