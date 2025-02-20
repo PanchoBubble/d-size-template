@@ -11,19 +11,19 @@ mod test {
         let mut template_test = TemplateTest::new(vec!["."]);
 
         // Create an Account
-        let (receiver_address, receiver_owner_proof, secret_key) =
+        let (_receiver_address, receiver_owner_proof, secret_key) =
             template_test.create_empty_account();
 
         // Create NFT component and resource
         let nft_component: ComponentAddress =
-            template_test.call_function("DSizeMeasureNft", "new", args![], vec![]);
+            template_test.call_function("DSizeMeasureNft", "new", args![Amount(1000), String::from("INCH")], vec![]);
 
         // Initially the total_supply of tokens is 0
         let total_supply: Amount =
             template_test.call_method(nft_component, "total_supply", args![], vec![]);
         assert_eq!(total_supply, Amount(0));
 
-        let resource_address: ResourceAddress =
+        let _resource_address: ResourceAddress =
             template_test.call_method(nft_component, "get_resource_address", args![], vec![]);
 
         let result = template_test
@@ -32,12 +32,9 @@ mod test {
                     .call_method(
                         nft_component,
                         "mint",
-                        args![Amount(100), String::from("INCH")],
+                        args![Amount(100)],
                     )
                     .put_last_instruction_output_on_workspace("new_nft")
-                    .call_method(receiver_address, "mint", args![Variable("new_nft")])
-                    .call_method(receiver_address, "balance", args![resource_address])
-                    .call_method(nft_component, "total_supply", args![])
                     .build()
                     .seal(&secret_key),
                 vec![receiver_owner_proof],

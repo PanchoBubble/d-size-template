@@ -627,9 +627,7 @@ dependencies = [
 name = "d_size_measure"
 version = "0.1.0"
 dependencies = [
- "getrandom 0.2.15",
  "log",
- "rand",
  "serde",
  "tari_common_types 1.11.5-pre.0",
  "tari_dan_common_types",

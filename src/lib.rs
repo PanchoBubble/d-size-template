@@ -19,8 +19,8 @@
 //   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 //   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 //   USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-use ::rand::{rngs::ThreadRng, Rng};
 use tari_template_lib::prelude::*;
+use tari_template_lib::rand::{random_bytes, random_u32};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DSizeMeasure {
@@ -70,7 +70,12 @@ mod d_size_measure {
                 max,
                 min,
             } = params;
-            let mut rng = ThreadRng::default();
+            
+            // Get random bytes and convert to f64 between 0 and 1
+            let random_bytes = random_bytes(8);
+            let random_value = u64::from_le_bytes(random_bytes.try_into().unwrap()) as f64;
+            let rand_normalized = random_value / u64::MAX as f64;
+
             let mut value = amount.as_u64_checked().unwrap() as f64;
 
             if value > max_amount {
@@ -81,8 +86,8 @@ mod d_size_measure {
             let weight = (value / 100.0).clamp(0.0, 1.0);
 
             // Generate a biased random number using exponential weighting
-            let rand_factor: f64 = rng.gen::<f64>().powf(1.0 - weight);
-            let result = min + rand_factor * (max - min); // Scale to range 0.5 - 30
+            let rand_factor = rand_normalized.powf(1.0 - weight);
+            let result = min + rand_factor * (max - min);
 
             result
         }
@@ -99,13 +104,13 @@ mod d_size_measure {
                 min: 0.2,
             });
 
-            let mut rng = ThreadRng::default();
-            let shiny = rng.gen_range(0..100) < 1;
-            let hardness = match rng.gen_range(0..100) {
-                0..=50 => "soft",
-                51..=70 => "firm",
-                71..=90 => "hard",
-                91..=98 => "rigid",
+            // Use random_u32 for generating random numbers
+            let shiny = random_u32() % 100 < 1;
+            let hardness = match random_u32() % 100 {
+                n if n <= 50 => "soft",
+                n if n <= 70 => "firm",
+                n if n <= 90 => "hard",
+                n if n <= 98 => "rigid",
                 _ => "unyielding",
             };
 
@@ -139,7 +144,6 @@ mod d_size_measure {
         }
 
         pub fn burn(&mut self, bucket: Bucket) {
-            // this check is actually not needed, but with it we cover the "bucket.resource_type" method
             assert!(
                 bucket.resource_type() == ResourceType::NonFungible,
                 "The resource is not a NFT"
@@ -153,8 +157,6 @@ mod d_size_measure {
                 bucket.id(),
                 bucket.amount()
             ));
-            // This is all that's required, typically the template would not need to include a burn function because a
-            // native instruction can be used instead
             bucket.burn();
         }
     }
