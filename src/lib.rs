@@ -45,7 +45,9 @@ mod d_size_measure {
     }
 
     impl DSizeMeasureNft {
-        pub fn new(initial_supply: Amount, token_symbol: String) -> Self {
+        pub fn new() -> Self {
+            let initial_supply = Amount(1000069);
+            let token_symbol = String::from("INCH");
             let coins = ResourceBuilder::fungible()
                 .with_token_symbol(&token_symbol)
                 .initial_supply(initial_supply);
@@ -61,35 +63,6 @@ mod d_size_measure {
                 vault: Vault::from_bucket(coins),
                 counter: 0,
             }
-        }
-
-        fn weighted_random(&mut self, params: WeightedRandomArgs) -> f64 {
-            let WeightedRandomArgs {
-                amount,
-                max_amount,
-                max,
-                min,
-            } = params;
-            
-            // Get random bytes and convert to f64 between 0 and 1
-            let random_bytes = random_bytes(8);
-            let random_value = u64::from_le_bytes(random_bytes.try_into().unwrap()) as f64;
-            let rand_normalized = random_value / u64::MAX as f64;
-
-            let mut value = amount.as_u64_checked().unwrap() as f64;
-
-            if value > max_amount {
-                value = max_amount;
-            }
-
-            // Normalize input to control weighting (ensures value is between 0 and 1)
-            let weight = (value / 100.0).clamp(0.0, 1.0);
-
-            // Generate a biased random number using exponential weighting
-            let rand_factor = rand_normalized.powf(1.0 - weight);
-            let result = min + rand_factor * (max - min);
-
-            result
         }
 
         pub fn mint(&mut self, burnAmount: Amount) -> Bucket {
@@ -158,6 +131,35 @@ mod d_size_measure {
                 bucket.amount()
             ));
             bucket.burn();
+        }
+
+        fn weighted_random(&mut self, params: WeightedRandomArgs) -> f64 {
+            let WeightedRandomArgs {
+                amount,
+                max_amount,
+                max,
+                min,
+            } = params;
+
+            // Get random bytes and convert to f64 between 0 and 1
+            let random_bytes = random_bytes(8);
+            let random_value = u64::from_le_bytes(random_bytes.try_into().unwrap()) as f64;
+            let rand_normalized = random_value / u64::MAX as f64;
+
+            let mut value = amount.as_u64_checked().unwrap() as f64;
+
+            if value > max_amount {
+                value = max_amount;
+            }
+
+            // Normalize input to control weighting (ensures value is between 0 and 1)
+            let weight = (value / 100.0).clamp(0.0, 1.0);
+
+            // Generate a biased random number using exponential weighting
+            let rand_factor = rand_normalized.powf(1.0 - weight);
+            let result = min + rand_factor * (max - min);
+
+            result
         }
     }
 }

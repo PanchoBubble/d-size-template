@@ -16,7 +16,7 @@ mod test {
 
         // Create NFT component and resource
         let nft_component: ComponentAddress =
-            template_test.call_function("DSizeMeasureNft", "new", args![Amount(1000), String::from("INCH")], vec![]);
+            template_test.call_function("DSizeMeasureNft", "new", args![], vec![]);
 
         // Initially the total_supply of tokens is 0
         let total_supply: Amount =
@@ -24,7 +24,7 @@ mod test {
         assert_eq!(total_supply, Amount(0));
 
         let _resource_address: ResourceAddress =
-            template_test.call_method(nft_component, "get_resource_address", args![], vec![]);
+            template_test.call_method(nft_component, "vault_address", args![], vec![]);
 
         let result = template_test
             .try_execute(
@@ -35,6 +35,7 @@ mod test {
                         args![Amount(100)],
                     )
                     .put_last_instruction_output_on_workspace("new_nft")
+                    .call_method(nft_component, "total_supply", args![])
                     .build()
                     .seal(&secret_key),
                 vec![receiver_owner_proof],
