@@ -29,11 +29,7 @@ mod test {
         let result = template_test
             .try_execute(
                 TransactionBuilder::new()
-                    .call_method(
-                        nft_component,
-                        "mint",
-                        args![Amount(100)],
-                    )
+                    .call_method(nft_component, "mint", args![Amount(100)])
                     .put_last_instruction_output_on_workspace("new_nft")
                     .call_method(nft_component, "total_supply", args![])
                     .build()
